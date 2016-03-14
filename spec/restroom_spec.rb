@@ -27,7 +27,7 @@ module Scifi
 
     restroom 'https://scifi.org', base_path: 'api' do
       exposes :authors, class: Author do
-        exposes :books, class: Book, id: :key do
+        exposes :titles, class: Book, resource: :books, id: :key do
           set :response_filter, Proc.new { |data| data['data'] }
         end
       end
@@ -92,12 +92,12 @@ describe Restroom do
   end
 
   it "collects author's books" do
-    expect(subject.authors.get(2).books.all).to all( be_a(Book) )
-    expect(subject.authors.get(2).books.all.collect(&:title)) =~ gibson_book_data.collect{ |a| a[:title] }
+    expect(subject.authors.get(2).titles.all).to all( be_a(Book) )
+    expect(subject.authors.get(2).titles.all.collect(&:title)) =~ gibson_book_data.collect{ |a| a[:title] }
   end
 
   it "collects a book" do
-    expect(subject.authors.get(2).books.get('mona-list-overdrive')).to be_a(Book)
-    expect(subject.authors.get(2).books.get('mona-list-overdrive').title).to eq('Mona Lisa Overdrive')
+    expect(subject.authors.get(2).titles.get('mona-list-overdrive')).to be_a(Book)
+    expect(subject.authors.get(2).titles.get('mona-list-overdrive').title).to eq('Mona Lisa Overdrive')
   end
 end
