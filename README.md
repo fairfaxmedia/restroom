@@ -1,6 +1,6 @@
 # Restroom
 
-Restroom provides a DSL to quickly and easily describe a RESTful and build a gem around it. I was extracted during the development of a Bitbucket API gem, thus the examples below.
+Restroom provides a DSL to quickly and easily describe a RESTful and build a gem around it. It was extracted during the development of a Bitbucket API gem, thus the examples below.
 
 ## Installation
 
@@ -27,15 +27,11 @@ module Bitbucket2
   class Client
     include Restroom
 
-    def token_callable
-      ... oath token code
-    end
-
-    restroom 'https://api.bitbucket.org', base_path: '2.0', oauth2_token_method: token_callable do |bitbucket|
-      bitbucket.exposes :repositories, class: Repository, id: :full_name do |repository|
-        repository.exposes :commits, class: Commit, id: :hash
-        repository.exposes :pull_requests, resource: 'pullrequests', class: PullRequest do |pull_request|
-          pull_request.exposes :commits, class: Commit, id: :hash
+    restroom 'https://api.bitbucket.org', base_path: '2.0' do
+      exposes :repositories, class: Repository, id: :full_name do
+        exposes :commits, class: Commit, id: :hash
+        exposes :pull_requests, resource: 'pullrequests', class: PullRequest do
+          exposes :commits, class: Commit, id: :hash
         end
       end
     end
