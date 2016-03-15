@@ -66,24 +66,29 @@ module Restroom
       raise ApiError, "couldn't parse response: #{body[0..20]}"
     end
 
-    def filter_result(path)
-      response_filter.call parsed_response(request(:get, path))
+    def filter_result(path, params={})
+      response_filter.call parsed_response(request(:get, path, params))
     end
 
     def get key
       build filter_result(singular_path(key))
     end
 
-    def all params={}
-      filter_result(plural_path).map { |data| build data }
+    def filter filter, params={}
+      filter_result(expand_path(resource_path, filter), params).map { |data| build data }
     end
 
-    def request method, path
-      response = connection.send(method, path)
+    def all params={}
+      filter_result(plural_path, params).map { |data| build data }
+    end
+
+    def request method, path, args={}
+      response = connection.send(method, path, args)
       if (200...300).include? response.status
         return response.body
       else
-        raise AuthenticationError if response.status == 403
+        raise AuthenticationError, 'unauthorised' if response.status == 401
+        raise AuthenticationError, 'forbidden' if response.status == 403
         raise ApiError
       end
     rescue Faraday::ClientError => e
