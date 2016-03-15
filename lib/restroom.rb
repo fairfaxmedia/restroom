@@ -49,8 +49,8 @@ module Restroom
 
     def connection
       @connection ||= Faraday.new endpoint do |config|
-        config.adapter Faraday.default_adapter
         stack(config) if respond_to? :stack
+        config.adapter Faraday.default_adapter
       end
     end
   end
