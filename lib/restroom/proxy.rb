@@ -89,7 +89,7 @@ module Restroom
       else
         raise AuthenticationError, 'unauthorised' if response.status == 401
         raise AuthenticationError, 'forbidden' if response.status == 403
-        raise ApiError
+        raise ApiError, response.body[0..100]
       end
     rescue Faraday::ClientError => e
       raise NetworkError, e.message
