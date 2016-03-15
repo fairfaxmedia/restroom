@@ -1,7 +1,7 @@
 require "restroom/version"
 require 'restroom/proxy'
 require 'restroom/relation'
-require 'restroom/dsl'
+require 'restroom/context'
 
 require 'active_support/inflector'
 require 'faraday'
@@ -18,22 +18,24 @@ module Restroom
     self.class
   end
 
+  def id
+    nil
+  end
+
   module ClassMethods
     attr_reader :endpoint, :base_path
 
     def restroom(endpoint, base_path: nil, &block)
       @endpoint = endpoint
       @base_path = base_path
-      DSL.new(host: self, parent: self).tap do |dsl|
-        dsl.wrapper(&block)
-      end
+      Context.build(host: self, parent: self, &block)
     end
 
     def resource_path
       base_path
     end
 
-    def klass
+    def model
       self
     end
 

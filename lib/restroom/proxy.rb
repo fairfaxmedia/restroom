@@ -11,19 +11,15 @@ module Restroom
     end
 
     def response_filter
-      dsl.children[key].response_filter
-    end
-
-    def key
-      dsl.key
+      dsl.response_filter
     end
 
     def resource
       dsl.resource
     end
 
-    def klass
-      dsl.klass || resource.to_s.classify.constantize
+    def model
+      dsl.model
     end
 
     def id_method
@@ -39,13 +35,13 @@ module Restroom
     end
 
     def build data={}
-      klass.new(data).tap do |obj|
+      model.new(data).tap do |obj|
         obj.restroom_parent = self
       end
     end
 
     def instance_id
-      instance.send(parent.id_method) if parent.respond_to? :id_method
+      instance.send(dsl.parent.id)
     end
 
     def expand_path *path

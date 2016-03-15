@@ -26,9 +26,10 @@ module Scifi
     end
 
     restroom 'https://scifi.org', base_path: 'api' do
-      exposes :authors, class: Author do
-        exposes :titles, class: Book, resource: :books, id: :key do
-          set :response_filter, Proc.new { |data| data['data'] }
+      exposes :authors do
+        exposes :influences, model: Author, response_filter: Proc.new { |data| data['influences'] }
+        exposes :titles, model: Book, resource: :books, id: :key do
+          response_filter Proc.new { |data| data['data'] }
         end
       end
     end.dump
@@ -40,7 +41,8 @@ describe Restroom do
 
   author_data = [
     { id: 1, name: 'Charlie Strauss' },
-    { id: 2, name: 'William Gibson' }
+    { id: 2, name: 'William Gibson' },
+    { id: 3, name: 'William S. Burroughs' }
   ]
 
   gibson_book_data = [
@@ -50,6 +52,10 @@ describe Restroom do
   subject { Scifi::Client.new }
 
   before do
+    stub_request(:get, "https://scifi.org/api/authors").
+      with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Faraday v0.9.2'}).
+      to_return(:status => 200, :body => JSON.dump(author_data), :headers => {})
+
     stub_request(:get, "https://scifi.org/api/authors/2").
       with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Faraday v0.9.2'}).
       to_return(:status => 200, :body => JSON.dump(author_data[1]), :headers => {})
@@ -58,9 +64,9 @@ describe Restroom do
       with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Faraday v0.9.2'}).
       to_return(:status => 200, :body => JSON.dump(data: gibson_book_data), :headers => {})
 
-    stub_request(:get, "https://scifi.org/api/authors").
+    stub_request(:get, "https://scifi.org/api/authors/2/influences").
       with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Faraday v0.9.2'}).
-      to_return(:status => 200, :body => JSON.dump(author_data), :headers => {})
+      to_return(:status => 200, :body => JSON.dump(influences: [author_data[3]]), :headers => {})
 
     stub_request(:get, "https://scifi.org/api/authors/2/books/mona-list-overdrive").
       with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Faraday v0.9.2'}).
@@ -68,9 +74,7 @@ describe Restroom do
   end
 
   context "for authors" do
-
     context "the plural path" do
-
       it "is returning a list of author objects" do
         expect(subject.authors.all).to all( be_a(Author) )
       end
@@ -89,6 +93,11 @@ describe Restroom do
         expect(subject.authors.get(2).name).to eq('William Gibson')
       end
     end
+  end
+
+  it "collects author's influences" do
+    expect(subject.authors.get(2).influences.all).to all( be_a(Author) )
+    expect(subject.authors.get(2).influences.all.collect(&:name)) =~ ['William S. Burroughs']
   end
 
   it "collects author's books" do
