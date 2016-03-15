@@ -54,4 +54,8 @@ module Restroom
       end
     end
   end
+
+  class ApiError < StandardError; end
+  class NetworkError < StandardError; end
+  class AuthenticationError < StandardError; end
 end

@@ -71,6 +71,18 @@ describe Restroom do
     stub_request(:get, "https://scifi.org/api/authors/2/books/mona-list-overdrive").
       with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Faraday v0.9.2'}).
       to_return(:status => 200, :body => JSON.dump(data: gibson_book_data.first), :headers => {})
+
+    stub_request(:get, "https://scifi.org/api/authors/3").
+      with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Faraday v0.9.2'}).
+      to_return(:status => 500, :body => "*bzzt*", :headers => {})
+
+    stub_request(:get, "https://scifi.org/api/authors/4").
+      with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Faraday v0.9.2'}).
+      to_timeout
+
+    stub_request(:get, "https://scifi.org/api/authors/5").
+      with(:headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Faraday v0.9.2'}).
+      to_return(:status => 403, :body => 'Who are you?', :headers => {})
   end
 
   context "for authors" do
@@ -108,5 +120,17 @@ describe Restroom do
   it "collects a book" do
     expect(subject.authors.get(2).titles.get('mona-list-overdrive')).to be_a(Book)
     expect(subject.authors.get(2).titles.get('mona-list-overdrive').title).to eq('Mona Lisa Overdrive')
+  end
+
+  it "handles a server error gracefully" do
+    expect { subject.authors.get(3) }.to raise_error(Restroom::ApiError)
+  end
+
+  it "handles a network error gracefully" do
+    expect { subject.authors.get(4) }.to raise_error(Restroom::NetworkError)
+  end
+
+  it "handles an authentication error gracefully" do
+    expect { subject.authors.get(5) }.to raise_error(Restroom::AuthenticationError)
   end
 end

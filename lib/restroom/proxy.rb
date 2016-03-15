@@ -60,28 +60,34 @@ module Restroom
       resource_path
     end
 
-    def plural_response(params)
-      connection.get(plural_path).body
+    def parsed_response body
+      JSON.parse body
+    rescue JSON::ParseError
+      raise ApiError, "couldn't parse response: #{body[0..20]}"
     end
 
-    def extract_plural_results params
-      response_filter.call JSON.parse(plural_response(params))
-    end
-
-    def singular_response(key)
-      connection.get(singular_path(key))
-    end
-
-    def extract_singular_result(key)
-      response_filter.call JSON.parse(singular_response(key).body)
+    def filter_result(path)
+      response_filter.call parsed_response(request(:get, path))
     end
 
     def get key
-      build extract_singular_result(key)
+      build filter_result(singular_path(key))
     end
 
     def all params={}
-      extract_plural_results(params).map {|data| build data }
+      filter_result(plural_path).map { |data| build data }
+    end
+
+    def request method, path
+      response = connection.send(method, path)
+      if (200...300).include? response.status
+        return response.body
+      else
+        raise AuthenticationError if response.status == 403
+        raise ApiError
+      end
+    rescue Faraday::ClientError => e
+      raise NetworkError, e.message
     end
   end
 end
