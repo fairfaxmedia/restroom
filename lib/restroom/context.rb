@@ -18,7 +18,7 @@ module Restroom
       end
     end
 
-    def initialize(host: nil, parent: nil, key: nil, **args, &block)
+    def initialize(host: nil, parent:, key: nil, **args, &block)
       @children = []
       @id = :id
 
@@ -43,12 +43,8 @@ module Restroom
       resource.to_s.classify.constantize if resource
     end
 
-    def self.build(host: nil, parent: nil, key: nil, attributes: {}, &block)
-      new(**attributes.merge(host: host, parent: parent, key: key), &block)
-    end
-
     def exposes key, **args, &block
-      @children << child = self.class.build(key: key, parent: self, attributes: args, &block)
+      @children << child = self.class.new(key: key, parent: self, **args, &block)
     end
 
     def dump

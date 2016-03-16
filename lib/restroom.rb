@@ -28,7 +28,7 @@ module Restroom
     def restroom(endpoint, base_path: nil, &block)
       @endpoint = endpoint
       @base_path = base_path
-      Context.build(host: self, parent: self, &block)
+      Context.new(host: self, parent: self, &block)
     end
 
     def resource_path
