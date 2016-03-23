@@ -44,18 +44,23 @@ module Restroom
     end
 
     def default_response_filter
-      Proc.new { |x| x }
+      Proc.new { |mode, response| response }
+    end
+
+    def stack
     end
 
     def connection
       @connection ||= Faraday.new endpoint do |config|
-        stack(config) if respond_to? :stack
+        stack(config)
         config.adapter Faraday.default_adapter
       end
     end
   end
 
-  class ApiError < StandardError; end
-  class NetworkError < StandardError; end
-  class AuthenticationError < StandardError; end
+  class Error < StandardError; end
+  class ApiError < Error; end
+  class DataError < Error; end
+  class NetworkError < Error; end
+  class AuthenticationError < Error; end
 end

@@ -10,6 +10,22 @@ module Restroom
       @dsl = dsl
     end
 
+    def iterate filter_by: nil, **args
+      Enumerator.new do |yielder|
+        page = 1
+        loop do
+          if filter_by
+            list = filter(filter_by, **args.merge(page: page))
+          else
+            list = all(**args.merge(page: page))
+          end
+          page += 1
+          break if list.empty?
+          list.each { |c| yielder.yield c }
+        end
+      end
+    end
+
     def response_filter
       dsl.response_filter
     end
@@ -66,20 +82,20 @@ module Restroom
       raise ApiError, "couldn't parse response: #{body[0..20]}"
     end
 
-    def filter_result(path, params={})
-      response_filter.call parsed_response(request(:get, path, params))
+    def filter_result(path, mode, params={})
+      response_filter.call(mode, parsed_response(request(:get, path, params)))
     end
 
     def get key
-      build filter_result(singular_path(key))
+      build filter_result(singular_path(key), :singular)
     end
 
     def filter filter, params={}
-      filter_result(expand_path(resource_path, filter), params).map { |data| build data }
+      filter_result(expand_path(resource_path, filter), :plural, params).map { |data| build data }
     end
 
     def all params={}
-      filter_result(plural_path, params).map { |data| build data }
+      filter_result(plural_path, :plural, params).map { |data| build data }
     end
 
     def request method, path, args={}
