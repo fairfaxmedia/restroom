@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{RESTful api gem scaffolding}
   spec.description   = %q{Restroom provides an expressive DSL for quickly implementing wrapper gems for REST APIs.}
-  spec.homepage      = "http://bitbucket.org/fairfax/restroom"
+  spec.homepage      = "http://github.com/fairfaxmedia/restroom"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
