@@ -20,7 +20,7 @@ Or install it yourself as:
 
 ## Usage
 
-Here's the client code from the [Bitbucket2](http://github.com/fairfax/bitbucket2) gem:
+Here's the client code from the [Bitbucket2](http://github.com/fairfaxmedia/bitbucket2) gem:
 
 ```
 module Bitbucket2
