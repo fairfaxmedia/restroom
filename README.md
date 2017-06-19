@@ -28,10 +28,10 @@ module Bitbucket2
     include Restroom
 
     restroom 'https://api.bitbucket.org', base_path: '2.0' do
-      exposes :repositories, class: Repository, id: :full_name do
-        exposes :commits, class: Commit, id: :hash
-        exposes :pull_requests, resource: 'pullrequests', class: PullRequest do
-          exposes :commits, class: Commit, id: :hash
+      exposes :repositories, model: Repository, id: :full_name do
+        exposes :commits, model: Commit, id: :hash
+        exposes :pull_requests, resource: 'pullrequests', model: PullRequest do
+          exposes :commits, model: Commit, id: :hash
         end
       end
     end
@@ -56,7 +56,7 @@ end
 The `exposes` invocation takes several options:
 
  - a key which is used to build the relation methods (so we can call Bitbucket2::Client.new.repositories, in this case),
- - a class to instantiate,
+ - a class (model) to instantiate,
  - a id for building nested paths (so in the case of repositories we use the `full_name` attribute).
 
 
