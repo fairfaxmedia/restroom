@@ -47,8 +47,7 @@ module Restroom
       Proc.new { |mode, response| response }
     end
 
-    def stack
-    end
+    def stack(config); end
 
     def connection
       @connection ||= Faraday.new endpoint do |config|
