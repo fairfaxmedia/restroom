@@ -52,7 +52,9 @@ module Restroom
     def connection
       @connection ||= Faraday.new endpoint do |config|
         stack(config)
-        config.adapter Faraday.default_adapter
+
+        adapters = config.builder.handlers
+        config.adapter Faraday.default_adapter if adapters.empty?
       end
     end
   end
